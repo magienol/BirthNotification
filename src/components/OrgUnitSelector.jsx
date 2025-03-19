@@ -1,27 +1,27 @@
-import React, { useState } from 'react';
-import { 
-  Button, 
-  OrganisationUnitTree, 
-  Modal, 
-  ModalTitle, 
-  ModalContent, 
-  ModalActions, 
-  Card, 
-  ButtonStrip, 
-  CircularLoader, 
-  NoticeBox 
-} from '@dhis2/ui';
-import { useDataQuery } from '@dhis2/app-runtime';
+import React, { useState } from "react";
+import {
+  Button,
+  OrganisationUnitTree,
+  Modal,
+  ModalTitle,
+  ModalContent,
+  ModalActions,
+  Card,
+  ButtonStrip,
+  CircularLoader,
+  NoticeBox,
+} from "@dhis2/ui";
+import { useDataQuery } from "@dhis2/app-runtime";
 
 const query = {
   orgUnits: {
-    resource: 'organisationUnits',
+    resource: "organisationUnits",
     params: {
-      fields: ['id', 'displayName', 'path', 'children::isNotEmpty'],
+      fields: ["id", "displayName", "path", "children::isNotEmpty"],
       paging: false,
-      level: 1
-    }
-  }
+      level: 1,
+    },
+  },
 };
 
 const OrgUnitSelector = ({ setOrgUnit, onOrgUnitSelected }) => {
@@ -31,11 +31,11 @@ const OrgUnitSelector = ({ setOrgUnit, onOrgUnitSelected }) => {
 
   // Updated handler to correctly capture the displayName from the onChange event
   const handleOrgUnitSelect = (selected) => {
-    console.log('Selected org unit:', selected); // For debugging
+    console.log("Selected org unit:", selected); // For debugging
     setSelectedOrgUnit({
       id: selected.id,
       displayName: selected.displayName,
-      path: selected.path
+      path: selected.path,
     });
   };
 
@@ -57,7 +57,9 @@ const OrgUnitSelector = ({ setOrgUnit, onOrgUnitSelected }) => {
   return (
     <div>
       <Button onClick={openModal} primary>
-        {selectedOrgUnit ? selectedOrgUnit.displayName : 'Select Organization Unit'}
+        {selectedOrgUnit
+          ? selectedOrgUnit.displayName
+          : "Select Organization Unit"}
       </Button>
 
       {isModalOpen && (
@@ -70,7 +72,7 @@ const OrgUnitSelector = ({ setOrgUnit, onOrgUnitSelected }) => {
               <OrganisationUnitTree
                 name="Organization Units"
                 onChange={handleOrgUnitSelect}
-                roots={rootOrgUnits.map(ou => ou.id)}
+                roots={rootOrgUnits.map((ou) => ou.id)}
                 selected={selectedOrgUnit ? [selectedOrgUnit.path] : []}
                 singleSelection
               />
@@ -80,8 +82,12 @@ const OrgUnitSelector = ({ setOrgUnit, onOrgUnitSelected }) => {
           </ModalContent>
           <ModalActions>
             <ButtonStrip end>
-              <Button onClick={closeModal} secondary>Cancel</Button>
-              <Button onClick={handleSave} primary>Save</Button>
+              <Button onClick={closeModal} secondary>
+                Cancel
+              </Button>
+              <Button onClick={handleSave} primary>
+                Save
+              </Button>
             </ButtonStrip>
           </ModalActions>
         </Modal>
@@ -89,7 +95,7 @@ const OrgUnitSelector = ({ setOrgUnit, onOrgUnitSelected }) => {
 
       {selectedOrgUnit && (
         <Card>
-          <div style={{ padding: '16px' }}>
+          <div style={{ padding: "16px" }}>
             <p>Selected Organization Unit: {selectedOrgUnit.displayName}</p>
           </div>
         </Card>
