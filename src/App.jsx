@@ -9,7 +9,7 @@ const App = () => {
 
   return (
     <div className="app-container">
-      <h4>DHIS2 Custom App Developement for Notification of Birth</h4>
+      <h6>DHIS2 Custom App Developement for Notification of Birth</h6>
       <GenerateReportButton orgUnit={orgUnit} period={period} />
     </div>
   );
