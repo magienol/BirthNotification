@@ -1,7 +1,6 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import {
   Modal,
-  ModalTitle,
   ModalContent,
   ModalActions,
   Button,
@@ -12,129 +11,207 @@ import {
   TableRow,
   Box,
 } from '@dhis2/ui';
-import moh from '../images/moh.png'; // Import the image correctly
+import moh from '../images/moh.png';
+import QRCode from 'react-qr-code';
 
-const DataView = ({ isOpen, onClose, eventData, dataElements }) => {
-  // Return null if no eventData is provided
+const DataView = ({ isOpen, onClose, eventData }) => {
   if (!eventData) return null;
 
-  // Reference for the certificate content
-  const certificateRef = useRef(null);
-
-  // Function to handle closing the modal
   const handleClose = () => {
-    onClose?.(); // Optional chaining for safety
+    onClose?.();
   };
 
-  // Helper function to get data value by data element ID
+  const handlePrint = () => {
+    window.print();
+  };
+
   const getDataValue = (dataElementId) => {
     if (!eventData || !eventData.dataValues) return '-';
     const dataValue = eventData.dataValues.find(dv => dv.dataElement === dataElementId);
     return dataValue ? dataValue.value : '-';
   };
 
-  // Get values for specific data elements
+  const formatDate = (dateStr) => {
+    return dateStr && dateStr !== '-' ? new Date(dateStr).toLocaleDateString() : '-';
+  };
+
   const childName = getDataValue('ZVlvCTT6G4A');
   const sex = getDataValue('cJ1lAdSRdOn');
-  const dob = getDataValue('FQTIz54NLN4');
+  const dob = formatDate(getDataValue('FQTIz54NLN4'));
+  const timeOfBirth = getDataValue('yxqZmHDnCWf');
+
   const motherFullName = getDataValue('J9i1DFTGnpb');
   const motherNationality = getDataValue('Ej58X2a6ZBA');
   const fatherFullName = getDataValue('uh1CxrbOqfW');
   const fatherNationality = getDataValue('sn6kx28cLYb');
 
-  // Format date properly if it exists
-  const formattedDob = dob !== '-' ? new Date(dob).toLocaleDateString() : '-';
+  const notifierNameInFull = getDataValue('QXjGgP1OGrP');
+  const notifierOccupation = getDataValue('Fe9NLNTucAU');
+  const notifierDate = formatDate(getDataValue('ZVvF8qK7skg'));
 
-  const titleStyle = {
-    textAlign: 'center',
-    width: '100%',
-    display: 'block',
-    fontWeight: 'bold',
-    marginBottom: '16px',
+  const midwifeFullName = getDataValue('OCI82CIDA6X');
+  const midwifeDate = formatDate(getDataValue('OLQWApHJ81N'));
+
+  const facility = eventData.orgUnitName || eventData.orgUnit || '-';
+
+  const qrData = {
+    childName,
+    sex,
+    dob,
+    motherFullName,
+    motherNationality,
+    fatherFullName,
+    fatherNationality,
+    facility,
+    certificateVerifiedUrl: 'https://dev.southsudanhis.org',
   };
 
-  const imageStyle = {
-    display: 'block',
+  const certificateStyle = {
+    width: '148mm',
+    minHeight: '210mm',
     margin: '0 auto',
-    width: '100px',  // Adjust the size as needed
-    height: 'auto',
-    marginTop: '10px',
+    padding: '20mm',
+    boxSizing: 'border-box',
+    fontFamily: 'Arial, sans-serif',
+    backgroundColor: '#fff',
+    backgroundImage: `url(${moh})`,
+    backgroundSize: '60%',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+    opacity: 1,
   };
 
   return (
-    <Modal position="middle" hide={!isOpen} onClose={handleClose}>
-      <Box>
-        <ModalTitle>
-          <div style={titleStyle}>
-            Republic of South Sudan <br /> Ministry of Health
-            <br />
-            Birth Notification Certificate
-          </div>
-        </ModalTitle>
+    <>
+      {/* Print styles */}
+      <style>
+  {`
+    @media print {
+      body * {
+        visibility: hidden;
+      }
 
-        {/* Add Image below the Title */}
-        <img src={moh} alt="Ministry of Health" style={imageStyle} /> {/* Use the imported image here */}
+      #print-area, #print-area * {
+        visibility: visible;
+      }
 
-      </Box>
+      #print-area {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 148mm;
+        height: 210mm;
+        padding: 0;
+        margin: 0;
+        box-sizing: border-box;
+        page-break-after: always;
 
-      <ModalContent>
-        <Box padding="16px" ref={certificateRef}>
-          {/* Information Display */}
-          <Table>
-            <TableBody>
-              {/* First Line: Name of the Child and Sex */}
-              <TableRow>
-                <TableCell><strong>Child Name:</strong></TableCell>
-                <TableCell>{childName}</TableCell>
-                <TableCell><strong>Sex:</strong></TableCell>
-                <TableCell>{sex}</TableCell>
-              </TableRow>
+        /* Optional: center content and fit to page using scale */
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        transform: scale(1);
+        transform-origin: top left;
+      }
 
-              {/* Second Line: Date of Birth and Organization Unit */}
-              <TableRow>
-                <TableCell><strong>Date of Birth:</strong></TableCell>
-                <TableCell>{formattedDob}</TableCell>
-                <TableCell><strong>Facility:</strong></TableCell>
-                <TableCell>{eventData.orgUnitName || eventData.orgUnit || '-'}</TableCell>
-              </TableRow>
+      .dhis2-ui-modal,
+      .dhis2-ui-modal__scrim {
+        display: none !important;
+      }
 
-              {/* Third Line: Mother Full Name and Mother Nationality */}
-              <TableRow>
-                <TableCell><strong>Mother Name:</strong></TableCell>
-                <TableCell>{motherFullName}</TableCell>
-                <TableCell><strong>Mother Nationality:</strong></TableCell>
-                <TableCell>{motherNationality}</TableCell>
-              </TableRow>
+      @page {
+        size: A5 portrait;
+        margin: 0;
+      }
 
-              {/* Fourth Line: Father Full Name and Father Nationality */}
-              <TableRow>
-                <TableCell><strong>Father Name:</strong></TableCell>
-                <TableCell>{fatherFullName}</TableCell>
-                <TableCell><strong>Father Nationality:</strong></TableCell>
-                <TableCell>{fatherNationality}</TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-          
-          <Box textAlign="center" marginTop="16px">
-            <div style={{ textAlign: 'center' }}>
-              This Birth Notification is system-generated and does not require a signature. <br />
-              You can verify the certificate by scanning the QR code.
+      html, body {
+        width: 148mm;
+        height: 210mm;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+    }
+  `}
+</style>
+
+
+      <Modal position="middle" hide={!isOpen} onClose={handleClose}>
+        <ModalContent>
+          <div id="print-area">
+            <div style={{ textAlign: 'center', fontWeight: 'bold', marginBottom: '16px', fontSize: '12px' }}>
+              <h1>
+                Republic of South Sudan
+                <br />
+                Ministry of Health
+                <br />
+                <span>Birth Notification Certificate</span>
+              </h1>
+              <img src={moh} alt="Ministry of Health" style={{ display: 'block', margin: '10px auto', width: '100px' }} />
             </div>
-          </Box>
 
-        </Box>
-      </ModalContent>
+            <Box padding="16px" style={{ ...certificateStyle, minHeight: 'auto' }}>
+              <Table>
+                <TableBody>
+                  <TableRow>
+                    <TableCell><strong>Child Name</strong></TableCell>
+                    <TableCell>{childName}</TableCell>
+                    <TableCell><strong>Sex</strong></TableCell>
+                    <TableCell>{sex}</TableCell>
+                  </TableRow>
 
-      <ModalActions>
-        <ButtonStrip end>
-          {/* Close button */}
-          <Button onClick={handleClose} primary>
-            Close
-          </Button>
-        </ButtonStrip>
-      </ModalActions>
-    </Modal>
+                  <TableRow>
+                    <TableCell><strong>Time of Birth</strong></TableCell>
+                    <TableCell>{timeOfBirth}</TableCell>
+                    <TableCell><strong>Date of Birth</strong></TableCell>
+                    <TableCell>{dob}</TableCell>
+                  </TableRow>
+
+                  <TableRow>
+                    <TableCell><strong>Facility</strong></TableCell>
+                    <TableCell>{facility}</TableCell>
+                    <TableCell><strong>Mother Name</strong></TableCell>
+                    <TableCell>{motherFullName}</TableCell>
+                  </TableRow>
+
+                  <TableRow>
+                    <TableCell><strong>Mother Nationality</strong></TableCell>
+                    <TableCell>{motherNationality}</TableCell>
+                    <TableCell><strong>Father Name</strong></TableCell>
+                    <TableCell>{fatherFullName}</TableCell>
+                  </TableRow>
+
+                  <TableRow>
+                    <TableCell><strong>Father Nationality</strong></TableCell>
+                    <TableCell>{fatherNationality}</TableCell>
+                    <TableCell><strong>Notifier Name</strong></TableCell>
+                    <TableCell>{notifierNameInFull}</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+
+              <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                <QRCode value={JSON.stringify(qrData)} size={128} fgColor="#000000" />
+              </div>
+
+              <Box textAlign="center" marginTop="16px">
+                <p>
+                  This Birth Notification is system-generated and does not require a signature. <br />
+                  You can verify the certificate by scanning the QR code.
+                </p>
+              </Box>
+            </Box>
+          </div>
+        </ModalContent>
+
+        <ModalActions>
+          <ButtonStrip end>
+            <Button onClick={handlePrint}>Print</Button>
+            <Button onClick={handleClose}>Close</Button>
+          </ButtonStrip>
+        </ModalActions>
+      </Modal>
+    </>
   );
 };
 
